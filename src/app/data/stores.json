@@ -1,0 +1,74 @@
+{
+    "stores": [
+        {
+            "Id": 1,
+            "Name": "BGim",
+            "Address": "O Higgins 264",
+            "Lat": -38.7223408,
+            "Lng": -62.2711566
+        },
+        {
+            "Id": 2,
+            "Name": "Full Fitness",
+            "Address": "O Higgins 380",
+            "Lat": -38.7233214,
+            "Lng": -62.2724317
+        },
+        {
+            "Id": 3,
+            "Name": "Gabrielli Gimnasio",
+            "Address": "Berutti 551",
+            "Lat": -38.7261878,
+            "Lng": -62.2670497
+        },
+        {
+            "Id": 4,
+            "Name": "Levrön Fitness",
+            "Address": "Blandengues 43",
+            "Lat": -38.7148156,
+            "Lng": -62.2749594
+        },
+        {
+            "Id": 5,
+            "Name": "Sagitarium Gym",
+            "Address": "Mitre 130",
+            "Lat": -38.7150168,
+            "Lng": -62.2672677
+        },
+        {
+            "Id": 6,
+            "Name": "Bahía Wellness",
+            "Address": "11 de abril 326",
+            "Lat": -38.7112947,
+            "Lng": -62.2687137
+        },
+        {
+            "Id": 7,
+            "Name": "Orión Gimnasio",
+            "Address": "Salta 40",
+            "Lat": -38.7108565,
+            "Lng": -62.2769842
+        },
+        {
+            "Id": 8,
+            "Name": "Uno Bahía Club",
+            "Address": "Lavalle 605",
+            "Lat": -38.7163808,
+            "Lng": -62.2565137
+        },
+        {
+            "Id": 9,
+            "Name": "Praxis Gimnasio",
+            "Address": "Mitre 1134",
+            "Lat": -38.7061128,
+            "Lng": -62.2786997
+        },
+        {
+            "Id": 10,
+            "Name": "La Roca Gym",
+            "Address": "Córdoba 535",
+            "Lat": -38.7019114,
+            "Lng": -62.2748937
+        }
+    ]
+}
