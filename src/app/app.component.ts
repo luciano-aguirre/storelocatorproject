@@ -66,6 +66,10 @@ export class AppComponent implements OnInit {
         });
 
         this.infoWindow = new google.maps.InfoWindow();
+        google.maps.event.addListener(this.infoWindow, 'closeclick', () => {
+            this.showIndications = false;
+        });
+
 
         this.loadStores(true);
     }
@@ -86,6 +90,10 @@ export class AppComponent implements OnInit {
         if (recalculateDistances) {
             this.storeModels = [];
         }
+    }
+
+    getIndications() {
+        this.showIndications = true;
     }
 
     async loadStores(recalculateDistances: boolean = false) {
@@ -113,7 +121,7 @@ export class AppComponent implements OnInit {
 
         // Add the topN markers
         for (let i = 0; i < this.topN; i++) {
-            let html: string = "<b>" + this.storeModels[i].name + "</b> <br/>" + this.storeModels[i].address + "<br>" + this.storeModels[i].distance + " metros</br> <button>Indicaciones</button>";
+            let html: string = '<b>' + this.storeModels[i].name + '</b> <br/>' + this.storeModels[i].address + '<br>' + this.storeModels[i].distance + ' metros</br> <button (click)=getIndications()>Indicaciones</button>';
             let newMarker: google.maps.Marker = new google.maps.Marker({
                 map: this.map,
                 position: this.storeModels[i].position
@@ -122,25 +130,9 @@ export class AppComponent implements OnInit {
             google.maps.event.addListener(newMarker, 'click', () => {
                 this.infoWindow.setContent(html);
                 this.infoWindow.open(this.map, newMarker);
-                this.showIndications = true;
             });
   
             this.markers.push(newMarker);
         }
     }
-  /*
-  createMarker(latlng, name, address, distance) {
-    console.log('marcador' + distance);
-    let html: string = "<b>" + name + "</b> <br/>" + address + "<br>" + distance + " metros";
-    let marker: google.maps.Marker = new google.maps.Marker({
-      map: this.map,
-      position: latlng
-    });
-
-    google.maps.event.addListener(marker, 'click', () => {
-      this.infoWindow.setContent(html);
-      this.infoWindow.open(this.map, marker);
-    });
-    this.markers.push(marker);
-  }*/
 }
