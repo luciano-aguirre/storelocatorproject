@@ -1,15 +1,33 @@
-<header>
-  <h1>{{userPosition}}</h1>
-</header>
-
 <section id="main-content">
-  <div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3">
+        Showing 
+        <input type="text" size="2" type="number" min="1" max="{{maxResults}}" [(ngModel)]="topN" (change)="loadStores()"/> of {{maxResults}} results
+        <div id="results" class="verticalScroll">
+            <div *ngFor="let store of selectedStores">
+                <div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                      <h5 class="card-title">{{store.name}}</h5>
+                      <h6 class="card-subtitle mb-2 text-muted">{{store.address}}</h6>
+                      <p class="card-text">Total distance: {{store.distance}} meters.</p>
+                    </div>
+                  </div>
+            </div>
+        </div>        
+      </div>
+      <div class="col-md-9">
+        <div #gmap id="map"></div>
+      </div>
+    </div>
+  </div>
+  <!-- div>
     <label for="addressInput">Numero de tiendas a mostrar: </label>
     <input type="text" id="addressInput" size="15" [(ngModel)]="topN"/>   
     <input type="button" id="searchButton" value="Buscar" (click)="loadStores()"/>
-  </div>
+  </div >
   <div #main>
     <div #gmap style="width:100%;height:800px"></div>
     <div #indications *ngIf="showIndications">Indicaciones</div>
-  </div>
+  </div -->
 </section>

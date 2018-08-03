@@ -25,14 +25,18 @@ export class AppComponent implements OnInit {
     userMarker: google.maps.Marker;
     userPosition: string;
     storeModels: StoreModel[];
+    selectedStores: StoreModel[];
     showIndications: boolean;
 
     // Input
     topN: number;
+    maxResults: number;
 
     ngOnInit() {
         this.storeModels = [];
+        this.selectedStores = [];
         this.topN = this.service.totalStores();
+        this.maxResults = this.service.totalStores();
         this.showIndications = false;
         var mapProp = {
             center: new google.maps.LatLng(-38.7169123,-62.2657356),
@@ -85,6 +89,7 @@ export class AppComponent implements OnInit {
             this.markers[i].setMap(null);
         }
         this.markers = [];
+        this.selectedStores = [];
 
         // Delete the store models
         if (recalculateDistances) {
@@ -119,12 +124,14 @@ export class AppComponent implements OnInit {
             else return 0;
         });
 
+        this.selectedStores = this.storeModels.slice(0, this.topN);
+
         // Add the topN markers
-        for (let i = 0; i < this.topN; i++) {
-            let html: string = '<b>' + this.storeModels[i].name + '</b> <br/>' + this.storeModels[i].address + '<br>' + this.storeModels[i].distance + ' metros</br> <button (click)=getIndications()>Indicaciones</button>';
+        for (let i = 0; i < this.selectedStores.length; i++) {
+            let html: string = '<b>' + this.selectedStores[i].name + '</b> <br/>' + this.selectedStores[i].address + '<br>' + this.selectedStores[i].distance + ' metros</br> <button (click)=getIndications()>Indicaciones</button>';
             let newMarker: google.maps.Marker = new google.maps.Marker({
                 map: this.map,
-                position: this.storeModels[i].position
+                position: this.selectedStores[i].position
             });
   
             google.maps.event.addListener(newMarker, 'click', () => {
