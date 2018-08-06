@@ -1,20 +1,49 @@
 <section id="main-content">
   <div class="container-fluid">
-    <div class="row">
+    <div class="row" style="min-height: 99vh; max-height: 99vh">
       <div class="col-md-3">
-        Showing 
-        <input type="text" size="2" type="number" min="1" max="{{maxResults}}" [(ngModel)]="topN" (change)="loadStores()"/> of {{maxResults}} results
-        <div id="results" class="verticalScroll">
-            <div *ngFor="let store of selectedStores">
-                <div class="card" style="width: 18rem;">
+        <div *ngIf="!showDirections">
+          Showing 
+          <input type="text" size="2" type="number" min="1" max="{{maxResults}}" [(ngModel)]="topN" (change)="loadStores()"/> of {{maxResults}} results  
+        </div>
+        <div *ngIf="showDirections">
+          <button (click)="hideDirections()">
+            Back
+          </button>
+        </div>
+        <div *ngIf="selectedStores.length > 0 && !showDirections" id="results" class="verticalScroll">
+            <div *ngFor="let store of selectedStores; let i = index">
+                <div class="card" style="width: 18rem;flex-direction: row">
                     <div class="card-body">
                       <h5 class="card-title">{{store.name}}</h5>
                       <h6 class="card-subtitle mb-2 text-muted">{{store.address}}</h6>
-                      <p class="card-text">Total distance: {{store.distance}} meters.</p>
+                      <p class="card-text">Distance: {{store.distance}} meters.</p>
+                    </div>
+                    <div>
+                      <button style="margin: 49% 0px" (click)="getDirections(i)">
+                        Indications
+                      </button>
                     </div>
                   </div>
             </div>
-        </div>        
+          </div>
+          <div *ngIf="showDirections">
+            <div class="card" style="width: 18rem;flex-direction: row">
+              <div class="card-body">
+                <h5 class="card-title">{{selectedStore.name}}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{selectedStore.address}}</h6>
+                <p class="card-text">Distance: {{selectedStore.distance}} meters.</p>
+              </div>
+            </div>
+            <div>
+              Directions
+              <ul *ngFor="let step of directions">
+                <li [innerHTML]="step.instruction.concat(' (' + step.distance + ' m)') + '.'">
+                  
+                </li>
+              </ul>
+            </div>
+          </div>        
       </div>
       <div class="col-md-9">
         <div #gmap id="map"></div>

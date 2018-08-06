@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { StoreModel } from './store-model';
 import { store } from '../../node_modules/@angular/core/src/render3/instructions';
 import { google } from '../../node_modules/@types/google-maps';
+import { InstructionModel } from './instruction-model';
 
 declare var google;
 
@@ -26,22 +27,45 @@ export class AppComponent implements OnInit {
     userPosition: string;
     storeModels: StoreModel[];
     selectedStores: StoreModel[];
-    showIndications: boolean;
+    showDirections: boolean;
+    directions: InstructionModel[];
+    selectedStore: StoreModel;
+    path: google.maps.Polyline;
 
     // Input
     topN: number;
     maxResults: number;
 
-    ngOnInit() {
+    ngOnInit() {     
+
         this.storeModels = [];
         this.selectedStores = [];
+        this.selectedStore = undefined;
         this.topN = this.service.totalStores();
         this.maxResults = this.service.totalStores();
-        this.showIndications = false;
+        this.showDirections = false;
+        this.directions = [];
         var mapProp = {
             center: new google.maps.LatLng(-38.7169123,-62.2657356),
             zoom: 15,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            styles: [
+                {
+                  "elementType": "labels",
+                  "stylers": [
+                    {
+                      "visibility": "off"
+                    }
+                  ]
+                },
+                {
+                    "featureType": "road",
+                    "elementType": "labels",
+                    "stylers": [
+                    { "visibility": "on" }
+                    ]
+                }
+            ]
         };
         this.map = new google.maps.Map(this.gmapElement.nativeElement, mapProp);
         this.markers = [];
@@ -70,9 +94,19 @@ export class AppComponent implements OnInit {
         });
 
         this.infoWindow = new google.maps.InfoWindow();
-        google.maps.event.addListener(this.infoWindow, 'closeclick', () => {
+        /*google.maps.event.addListener(this.infoWindow, 'closeclick', () => {
             this.showIndications = false;
-        });
+        });*/
+
+        this.path = new google.maps.Polyline({
+            path: [],
+            geodesic: true,
+            strokeColor: '#FF0000',
+            strokeOpacity: 1.0,
+            strokeWeight: 2
+          });
+  
+        this.path.setMap(this.map);
 
 
         this.loadStores(true);
@@ -83,6 +117,8 @@ export class AppComponent implements OnInit {
     clearStores(recalculateDistances: boolean) {
         // Close the infoWindow
         this.infoWindow.close();
+
+        this.path.setPath([]);
         
         // Set marker's map to null and delete the references
         for (let i = 0; i < this.markers.length; i++) {
@@ -95,10 +131,8 @@ export class AppComponent implements OnInit {
         if (recalculateDistances) {
             this.storeModels = [];
         }
-    }
 
-    getIndications() {
-        this.showIndications = true;
+        this.ref.detectChanges();
     }
 
     async loadStores(recalculateDistances: boolean = false) {
@@ -125,13 +159,26 @@ export class AppComponent implements OnInit {
         });
 
         this.selectedStores = this.storeModels.slice(0, this.topN);
+        this.ref.detectChanges();
 
         // Add the topN markers
         for (let i = 0; i < this.selectedStores.length; i++) {
-            let html: string = '<b>' + this.selectedStores[i].name + '</b> <br/>' + this.selectedStores[i].address + '<br>' + this.selectedStores[i].distance + ' metros</br> <button (click)=getIndications()>Indicaciones</button>';
+            let html: string = '<b>' + this.selectedStores[i].name + '</b> <br/>' + this.selectedStores[i].address + '<br>' + this.selectedStores[i].distance + ' metros</br>';
             let newMarker: google.maps.Marker = new google.maps.Marker({
                 map: this.map,
-                position: this.selectedStores[i].position
+                position: this.selectedStores[i].position,
+                //label: this.selectedStores[i].name,
+                icon: {
+                    url: "https://maps.gstatic.com/intl/en_us/mapfiles/markers2/measle.png",
+                    labelOrigin: new google.maps.Point(0, -10),
+                    size: new google.maps.Size(40,40),
+                    anchor: new google.maps.Point(16,32)
+                  },
+                  label: {
+                    text: this.selectedStores[i].name,
+                    color: "#000",
+                    fontWeight: "bold"
+                  }
             });
   
             google.maps.event.addListener(newMarker, 'click', () => {
@@ -141,5 +188,23 @@ export class AppComponent implements OnInit {
   
             this.markers.push(newMarker);
         }
+    }
+
+    async getDirections(pos: number) {
+        let coordinates = [];
+        coordinates.push(this.userMarker.getPosition());
+        this.selectedStore = this.selectedStores[pos];
+        this.directions = await this.service.getDirections(this.userMarker.getPosition(), this.selectedStore.position);
+        for(let d of this.directions) {
+            coordinates.push(d.endLocation);
+        }
+        coordinates.push(this.selectedStore.position);
+        this.path.setPath(coordinates);
+        this.showDirections = true;
+    }
+
+    hideDirections() {
+        this.showDirections = false;
+        this.loadStores(true);
     }
 }

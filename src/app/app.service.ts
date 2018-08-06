@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {} from '@types/googlemaps';
 import { StoreModel } from './store-model';
 import * as stores from "./data/stores.json";
+import { InstructionModel } from './instruction-model';
  
 const httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -47,6 +48,18 @@ export class AppService {
         //let response = await this.http.get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + position.lat() + ',' + position.lng() + '&result_type=street_address&key=AIzaSyDKhMB2O7xShEa14EFRfsoQcNoWEZ8Fjfw').toPromise();
         //return response["results"][0]["address_components"][1]["long_name"] + ' ' + response["results"][0]["address_components"][0]["long_name"];
         return this.http.get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + position.lat() + ',' + position.lng() + '&result_type=street_address&key=AIzaSyDKhMB2O7xShEa14EFRfsoQcNoWEZ8Fjfw');
+    }
+
+    async getDirections(origin: google.maps.LatLng, destination: google.maps.LatLng): Promise<InstructionModel[]> {
+        let directions: InstructionModel[] = [];
+        let response = await this.http.get('https://maps.googleapis.com/maps/api/directions/json?origin=' + origin.lat() + ',' + origin.lng() +'&destination=' + destination.lat() + ',' + destination.lng() + '&mode=walking&key=AIzaSyAN-iN1ImnlC2jaSrLg32f2RhDkjkmftNQ').toPromise();
+        let steps = response["routes"][0]["legs"][0]["steps"];
+        
+        for (let i = 0; i < steps.length; i++) {
+            directions.push(new InstructionModel(steps[i]["html_instructions"], steps[i]["distance"]["value"], new google.maps.LatLng(steps[i]["end_location"]["lat"], steps[i]["end_location"]["lng"])));
+        }
+
+        return directions;
     }
 
 }
