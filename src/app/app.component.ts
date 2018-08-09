@@ -1,10 +1,9 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { ViewChild } from '@angular/core';
+import { ViewChild, ElementRef, NgZone } from '@angular/core';
 import {} from '@types/googlemaps';
+import { MapsAPILoader } from '@agm/core';
 import { AppService } from './app.service';
 import { StoreModel } from './store-model';
-import { store } from '../../node_modules/@angular/core/src/render3/instructions';
-import { google } from '../../node_modules/@types/google-maps';
 import { InstructionModel } from './instruction-model';
 
 declare var google;
@@ -16,10 +15,12 @@ declare var google;
 })
 export class AppComponent implements OnInit {
 
-    constructor(private ref: ChangeDetectorRef, private service: AppService){}
+    constructor(private ref: ChangeDetectorRef, private service: AppService, private mapsAPILoader: MapsAPILoader, private ngZone: NgZone){}
     @ViewChild('gmap') gmapElement: any;
+    @ViewChild('search') public searchElement: ElementRef;
 
     map: google.maps.Map;
+    autocomplete: google.maps.places.Autocomplete;
     markers: google.maps.Marker[]; 
     infoWindow: google.maps.InfoWindow;
     locationSelect: any;
@@ -30,6 +31,7 @@ export class AppComponent implements OnInit {
     showDirections: boolean;
     directions: InstructionModel[];
     selectedStore: StoreModel;
+    
     path: google.maps.Polyline;
 
     // Input
@@ -47,6 +49,7 @@ export class AppComponent implements OnInit {
         this.directions = [];
         var mapProp = {
             center: new google.maps.LatLng(-38.7169123,-62.2657356),
+            panControl: true,
             zoom: 15,
             mapTypeId: google.maps.MapTypeId.ROADMAP,
             styles: [
@@ -72,13 +75,19 @@ export class AppComponent implements OnInit {
         this.userMarker = new google.maps.Marker({
             map: this.map,
             position: new google.maps.LatLng(-38.7169123,-62.2657356),
-            icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+            icon: {
+                url: "https://image.flaticon.com/icons/svg/34/34343.svg",    
+                scaledSize: new google.maps.Size(40, 40), // scaled size
+               // origin: new google.maps.Point(0,0), // origin
+               // anchor: new google.maps.Point(0, 0), // anchor
+            },
             draggable: true,
         });
         this.userMarker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
 
         this.userPosition = this.userMarker.getPosition().toString();
         google.maps.event.addListener(this.userMarker, 'dragend', () => {
+            this.showDirections = false;
             this.userPosition = this.userMarker.getPosition().toString();
             this.ref.detectChanges();
             this.loadStores(true);
@@ -92,6 +101,35 @@ export class AppComponent implements OnInit {
          //   this.infoWindow.setContent("<b>Current position</b> <br/>" + await this.service.reverseGeocoding(this.userMarker.getPosition()) + "<br>");
          //   this.infoWindow.open(this.map, this.userMarker);
         });
+
+        this.mapsAPILoader.load().then(
+            () => {
+                let autocomplete = new google.maps.places.Autocomplete(
+                    this.searchElement.nativeElement, 
+                    { 
+                        types: ["address"], 
+                        componentRestrictions: { country: "AR" },
+                        strictBounds: true,
+                        bounds: new google.maps.LatLngBounds(
+                            new google.maps.LatLng(-38.791171, -62.376949),
+                            new google.maps.LatLng(-38.654649, -62.147708))
+                    }
+                );
+    
+                autocomplete.addListener("place_changed", () => {
+                this.ngZone.run(() => {
+                    let place: google.maps.places.PlaceResult = autocomplete.getPlace();
+                        if(place.geometry === undefined || place.geometry === null ){
+                            return;
+                        }
+                        this.userMarker.setPosition(new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng()));
+                        this.map.panTo(this.userMarker.getPosition());
+                        this.loadStores(true);
+                    });
+                });
+            }
+        );               
+
 
         this.infoWindow = new google.maps.InfoWindow();
         /*google.maps.event.addListener(this.infoWindow, 'closeclick', () => {
@@ -111,6 +149,12 @@ export class AppComponent implements OnInit {
 
         this.loadStores(true);
     }
+
+  /*  userMarkerChangePosition() {
+        // Get the place details from the autocomplete object.
+        let place = this.autocomplete.getPlace();
+        this.userMarker.setPosition(new google.maps.LatLng(place.geometry.location.lat, place.geometry.location.lng));
+    }*/
 
 
 
@@ -172,7 +216,7 @@ export class AppComponent implements OnInit {
                     url: "https://maps.gstatic.com/intl/en_us/mapfiles/markers2/measle.png",
                     labelOrigin: new google.maps.Point(0, -10),
                     size: new google.maps.Size(40,40),
-                    anchor: new google.maps.Point(16,32)
+                    anchor: new google.maps.Point(0,0)
                   },
                   label: {
                     text: this.selectedStores[i].name,
@@ -191,6 +235,13 @@ export class AppComponent implements OnInit {
     }
 
     async getDirections(pos: number) {
+
+        for (let i = 0; i < this.selectedStores.length; i++) {
+            if (i != pos) {
+                this.markers[i].setMap(null);
+            }
+        }
+
         let coordinates = [];
         coordinates.push(this.userMarker.getPosition());
         this.selectedStore = this.selectedStores[pos];
@@ -205,6 +256,15 @@ export class AppComponent implements OnInit {
 
     hideDirections() {
         this.showDirections = false;
-        this.loadStores(true);
+
+        for (let i = 0; i < this.selectedStores.length; i++) {
+            this.markers[i].setMap(this.map);
+            
+        }
+
+        this.path.setPath([]);
+
+        this.ref.detectChanges();
+        //this.loadStores(true);
     }
 }

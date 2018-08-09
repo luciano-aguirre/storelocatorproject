@@ -1,62 +1,65 @@
 <section id="main-content">
   <div class="container-fluid">
-    <div class="row" style="min-height: 99vh; max-height: 99vh">
-      <div class="col-md-3">
-        <div *ngIf="!showDirections">
-          Showing 
-          <input type="text" size="2" type="number" min="1" max="{{maxResults}}" [(ngModel)]="topN" (change)="loadStores()"/> of {{maxResults}} results  
+    <div class="row">
+      <div id="left-side-bar" class="col-md-3">
+        <div id="left-side-bar-header">
+          <div class="left-side-bar-header-content" *ngIf="!showDirections">
+            <div class="form-group">
+              <input id="search" type="text" placeholder="Enter an address" autocorrect="off" autocapitalize="off" spellcheck="off" class="form-control" #search>
+            </div>
+            <div id="numberResults" class="text-left font-weight-bold">
+              Showing 
+              <input type="text" class="text-center" size="2" type="number" min="1" max="{{maxResults}}" [(ngModel)]="topN" (change)="loadStores()"/> of {{maxResults}} results
+            </div>  
+          </div>
+          <div id="selectedStoreName" *ngIf="showDirections">
+            <button id="btnBack" (click)="hideDirections()">
+              Back
+            </button>
+            <h1>
+              {{selectedStore.name}}
+            </h1>
+          </div>
         </div>
-        <div *ngIf="showDirections">
-          <button (click)="hideDirections()">
-            Back
-          </button>
-        </div>
-        <div *ngIf="selectedStores.length > 0 && !showDirections" id="results" class="verticalScroll">
+        <div *ngIf="selectedStores.length > 0 && !showDirections" class="verticalScroll">
             <div *ngFor="let store of selectedStores; let i = index">
-                <div class="card" style="width: 18rem;flex-direction: row">
-                    <div class="card-body">
+                <div class="card result">
+                    <div class="card-body resultDetails">
                       <h5 class="card-title">{{store.name}}</h5>
                       <h6 class="card-subtitle mb-2 text-muted">{{store.address}}</h6>
                       <p class="card-text">Distance: {{store.distance}} meters.</p>
                     </div>
-                    <div>
-                      <button style="margin: 49% 0px" (click)="getDirections(i)">
+                    <div class="btnIndications">
+                      <button (click)="getDirections(i)">
                         Indications
                       </button>
                     </div>
                   </div>
             </div>
           </div>
-          <div *ngIf="showDirections">
-            <div class="card" style="width: 18rem;flex-direction: row">
-              <div class="card-body">
-                <h5 class="card-title">{{selectedStore.name}}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{selectedStore.address}}</h6>
-                <p class="card-text">Distance: {{selectedStore.distance}} meters.</p>
-              </div>
-            </div>
-            <div>
+        <div id="selectedStoreDetails" *ngIf="showDirections">
+          <div>
+            
+          </div>
+          <div>
+            <b> Address: </b> {{selectedStore.address}}. <br>
+            <b> Total distance: </b> {{selectedStore.distance}} m.
+          </div>          
+          <div id="directions">
+            <h3>
               Directions
-              <ul *ngFor="let step of directions">
-                <li [innerHTML]="step.instruction.concat(' (' + step.distance + ' m)') + '.'">
-                  
-                </li>
-              </ul>
-            </div>
-          </div>        
+            </h3>
+            <ul *ngFor="let step of directions">
+              <li [innerHTML]="step.instruction.concat(' (' + step.distance + ' m)') + '.'">
+                
+              </li>
+            </ul>
+          </div>
+        </div>        
       </div>
-      <div class="col-md-9">
+      <div id="right-side-bar" class="col-md-9">
         <div #gmap id="map"></div>
       </div>
     </div>
   </div>
-  <!-- div>
-    <label for="addressInput">Numero de tiendas a mostrar: </label>
-    <input type="text" id="addressInput" size="15" [(ngModel)]="topN"/>   
-    <input type="button" id="searchButton" value="Buscar" (click)="loadStores()"/>
-  </div >
-  <div #main>
-    <div #gmap style="width:100%;height:800px"></div>
-    <div #indications *ngIf="showIndications">Indicaciones</div>
-  </div -->
 </section>
