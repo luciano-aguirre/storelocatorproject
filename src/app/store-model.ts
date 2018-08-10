@@ -1,4 +1,4 @@
-import {} from '@types/googlemaps';
+import {} from 'googlemaps';
 
 export class StoreModel {
 
@@ -15,19 +15,4 @@ export class StoreModel {
         this.position = position;
         this.distance = distance;
     }
-
-    /*getMarker(map: google.maps.Map, infoWindow: google.maps.InfoWindow): google.maps.Marker {
-        let html: string = "<b>" + name + "</b> <br/>" + this.address + "<br>" + this.distance + " metros</br> <button onclick='myFunction()'>Indicaciones</button>'";
-        let marker: google.maps.Marker = new google.maps.Marker({
-            map: map,
-            position: this.position
-        });
-
-        google.maps.event.addListener(marker, 'click', () => {
-            infoWindow.setContent(html);
-            infoWindow.open(map, marker);
-        });
-
-        return marker;
-    }*/
 }

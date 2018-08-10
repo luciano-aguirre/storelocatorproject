@@ -1,10 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ViewChild, ElementRef, NgZone } from '@angular/core';
-import {} from '@types/googlemaps';
+import {} from 'googlemaps';
 import { MapsAPILoader } from '@agm/core';
 import { AppService } from './app.service';
 import { StoreModel } from './store-model';
 import { InstructionModel } from './instruction-model';
+import { TravelOptions } from './travel-options-enum';
 
 declare var google;
 
@@ -14,6 +15,7 @@ declare var google;
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
+
 
     constructor(private ref: ChangeDetectorRef, private service: AppService, private mapsAPILoader: MapsAPILoader, private ngZone: NgZone){}
     @ViewChild('gmap') gmapElement: any;
@@ -38,8 +40,10 @@ export class AppComponent implements OnInit {
     topN: number;
     maxResults: number;
 
-    ngOnInit() {     
+    travelMode: TravelOptions;
 
+    ngOnInit() {     
+        this.travelMode = TravelOptions.Walking;
         this.storeModels = [];
         this.selectedStores = [];
         this.selectedStore = undefined;
@@ -159,8 +163,8 @@ export class AppComponent implements OnInit {
 
 
     clearStores(recalculateDistances: boolean) {
-        // Close the infoWindow
-        this.infoWindow.close();
+
+        this.showDirections = false;
 
         this.path.setPath([]);
         
@@ -234,37 +238,27 @@ export class AppComponent implements OnInit {
         }
     }
 
-    async getDirections(pos: number) {
+    async getDirections(pos: number, mode: string) {
 
-        for (let i = 0; i < this.selectedStores.length; i++) {
-            if (i != pos) {
-                this.markers[i].setMap(null);
+        // User only changed travel mode
+        if (pos !== -1) {
+            for (let i = 0; i < this.selectedStores.length; i++) {
+                if (i != pos) {
+                    this.markers[i].setMap(null);
+                }
             }
-        }
+            this.selectedStore = this.selectedStores[pos];
+        }        
 
         let coordinates = [];
         coordinates.push(this.userMarker.getPosition());
-        this.selectedStore = this.selectedStores[pos];
-        this.directions = await this.service.getDirections(this.userMarker.getPosition(), this.selectedStore.position);
+        
+        this.directions = await this.service.getDirections(this.userMarker.getPosition(), this.selectedStore.position, mode);
         for(let d of this.directions) {
             coordinates.push(d.endLocation);
         }
         coordinates.push(this.selectedStore.position);
         this.path.setPath(coordinates);
         this.showDirections = true;
-    }
-
-    hideDirections() {
-        this.showDirections = false;
-
-        for (let i = 0; i < this.selectedStores.length; i++) {
-            this.markers[i].setMap(this.map);
-            
-        }
-
-        this.path.setPath([]);
-
-        this.ref.detectChanges();
-        //this.loadStores(true);
     }
 }

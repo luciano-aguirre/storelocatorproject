@@ -1,4 +1,4 @@
-import {} from '@types/googlemaps';
+import {} from 'googlemaps';
 
 export class InstructionModel {
     instruction: string;
