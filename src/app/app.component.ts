@@ -41,6 +41,7 @@ export class AppComponent implements OnInit {
     maxResults: number;
 
     travelMode: TravelOptions;
+    public TravelOptionsEnum = TravelOptions;
 
     ngOnInit() {     
         this.travelMode = TravelOptions.Walking;
@@ -238,7 +239,7 @@ export class AppComponent implements OnInit {
         }
     }
 
-    async getDirections(pos: number, mode: string) {
+    async getDirections(pos: number) {
 
         // User only changed travel mode
         if (pos !== -1) {
@@ -253,7 +254,7 @@ export class AppComponent implements OnInit {
         let coordinates = [];
         coordinates.push(this.userMarker.getPosition());
         
-        this.directions = await this.service.getDirections(this.userMarker.getPosition(), this.selectedStore.position, mode);
+        this.directions = await this.service.getDirections(this.userMarker.getPosition(), this.selectedStore.position, this.travelMode === TravelOptions.Walking? 'walking' : 'driving');
         for(let d of this.directions) {
             coordinates.push(d.endLocation);
         }

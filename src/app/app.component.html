@@ -38,19 +38,12 @@
             </div>
           </div>
         <div id="selectedStoreDetails" *ngIf="showDirections">
-          <!--div class="btn-group" role="group" aria-label="Basic example">
-            <button type="button" class="btn btn-light" (click)="travelMode=TravelOptions.Walking;getDirections(-1)">Walking</button>
-            <button type="button" class="btn btn-light" (click)="travelMode=TravelOptions.Driving;getDirections(-1)">Driving</button>
-          </div-->
-          <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            <label class="btn btn-secondary active">
-              <input type="radio" name="options" autocomplete="off" (click)="alert('asdsa')" checked> Walking
-            </label>
-            <label class="btn btn-secondary">
-              <input type="radio" name="options" autocomplete="off" (click)="getDirections(-1,'driving')"> Driving
-            </label>
+          <b>Travel Mode:</b> 
+          <div class="btn-group" style="margin-left: 5%">
+            <button type="button" class="btn btn-secondary" [disabled] = "travelMode === TravelOptionsEnum.Walking" (click)="travelMode = TravelOptionsEnum.Walking; getDirections(-1)">Walking</button>
+            <button type="button" class="btn btn-secondary" [disabled] = "travelMode === TravelOptionsEnum.Driving" (click)="travelMode = TravelOptionsEnum.Driving; getDirections(-1)">Driving</button>
           </div>
-          <div>
+          <div id="travelInfo">
             <b> Address: </b> {{selectedStore.address}}. <br>
             <b> Total distance: </b> {{selectedStore.distance}} m.
           </div>          
